@@ -1,13 +1,7 @@
 import Image from "next/image";
 import { Heart } from "lucide-react";
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import type { CharacterCardData } from "@/types/characterType";
 
@@ -23,19 +17,16 @@ export const CharacterCard = ({
   isFavorite,
 }: CharacterCardProps) => {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{character.name}</CardTitle>
-      </CardHeader>
+    <Card className="w-full max-w-sm">
       <CardContent className="flex flex-col gap-3">
         <Image
           src={character.image}
           alt={character.name}
-          width={100}
-          height={100}
-          className="rounded-lg border border-line"
+          width={300}
+          height={300}
+          className="aspect-square w-full rounded-lg border border-line object-cover"
         />
-        <CardDescription>Character Description</CardDescription>
+        <CardDescription>{character.name}</CardDescription>
         <Button variant="outline" onClick={onFavorite}>
           <Heart
             className={
