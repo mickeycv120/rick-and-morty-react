@@ -9,7 +9,7 @@ export default function Home() {
   return (
     <div>
       <section
-        className="mx-auto flex max-w-[1440px] items-end justify-between gap-8 px-8 pt-12 pb-6"
+        className="mx-auto flex max-w-[1440px] flex-col gap-4 px-8 pt-12 pb-6"
         aria-labelledby="hero-heading"
       >
         <h1
@@ -18,30 +18,35 @@ export default function Home() {
         >
           Explora el{" "}
           <em className="not-italic bg-[linear-gradient(110deg,var(--acid)_30%,var(--violet)_90%)] bg-clip-text text-transparent">
-            multiverso
+            multiverso <br />
           </em>{" "}
           infinito de personajes
         </h1>
-        <p className="m-3.5 text-[var(--ink-dim)] text-md ">
-          Encuentra a tus personajes favoritos y descubre más sobre su historia en el universo de Rick and Morty.
-        </p>
+        <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+          <p className="m-0 max-w-2xl text-ink-dim text-md">
+            Encuentra a tus personajes favoritos y descubre más sobre su historia en el universo de Rick and Morty.
+          </p>
+          <div className="flex shrink-0 gap-8 sm:justify-end sm:gap-10">
+            <div>
+              <div className="font-heading text-2xl font-semibold tabular-nums text-foreground">
+                {data?.info.count ?? "-"}
+              </div>
+              <div className="text-sm text-ink-dim">Personajes</div>
+            </div>
+            <div>
+              <div className="font-heading text-2xl font-semibold tabular-nums text-foreground">
+                {data?.info.pages ?? "-"}
+              </div>
+              <div className="text-sm text-ink-dim">Páginas</div>
+            </div>
+          </div>
+        </div>
       </section>
 
       <section aria-labelledby="characters-heading">
         <h2 id="characters-heading" className="sr-only">
           Personajes
         </h2>
-        <div className="flex gap-4 px-8">
-          <div>
-            <div>{data?.info.count ?? "-"}</div>
-            <div>Personajes</div>
-          </div>
-
-          <div>
-            <div>{data?.info.pages ?? "-"}</div>
-            <div>Páginas</div>
-          </div>
-        </div>
 
         {/* 
       <div>
