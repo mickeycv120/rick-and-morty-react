@@ -1,36 +1,102 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Rick and Morty — explorador de personajes
 
-## Getting Started
+Aplicación web para consultar personajes de la [Rick and Morty API](https://rickandmortyapi.com/): listado paginado, búsqueda por nombre, vista de detalle y favoritos persistidos en el cliente. Front construido con Next.js (App Router), React 19 y TypeScript; estilos con Tailwind CSS v4 y componentes base alineados con shadcn/ui.
 
-First, run the development server:
+---
+
+## Requisitos
+
+- Node.js 20+ (recomendado alinear con el ecosistema Next.js actual)
+- npm (gestor usado en los scripts del repo)
+
+---
+
+## Instalación y ejecución
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+La app queda disponible en `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| Script        | Descripción                          |
+| ------------- | ------------------------------------ |
+| `npm run dev` | Servidor de desarrollo (Next.js)     |
+| `npm run build` | Compilación de producción          |
+| `npm run start` | Servidor tras `build`              |
+| `npm run lint`  | ESLint (config Next.js)            |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## Funcionalidades implementadas
 
-To learn more about Next.js, take a look at the following resources:
+- **Listado paginado** de personajes consumiendo `GET /api/character` con parámetros `page` y, opcionalmente, `name`.
+- **Búsqueda por nombre** sincronizada con la URL (query params), con debounce en el navbar para limitar llamadas mientras se escribe.
+- **Favoritos** con estado global (Zustand) y persistencia en `localStorage` bajo la clave `rm-favorites`; solo se almacena el recorte de datos necesario para la tarjeta (`CharacterCardData`).
+- **Detalle en modal** desde la tarjeta, sin ruta adicional de detalle.
+- **Estados de interfaz**: carga (skeletons), error de red/servidor, lista vacía o sin coincidencias; tratamiento explícito del `404` de la API como “sin resultados”.
+- **Accesibilidad básica**: atributos `aria-*` y estructura pensada para lectura y foco razonables en listado y modal.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Stack técnico
 
-## Deploy on Vercel
+| Área            | Elección                                      |
+| --------------- | --------------------------------------------- |
+| Framework       | Next.js 16 (App Router)                       |
+| UI              | React 19, TypeScript 5                        |
+| Datos remotos   | TanStack Query v5 (`staleTime` 60 s por defecto en `app/providers.tsx`) |
+| Estado local    | Zustand + `persist` para favoritos            |
+| Estilos         | Tailwind CSS v4                               |
+| Componentes UI  | Radix + patrones shadcn (`components/ui/*`)   |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Arquitectura y decisiones
+
+1. **Capa de datos** (`services/characters.service.ts`): única función de acceso HTTP al endpoint de personajes; normalización del `404` de la API a respuesta vacía para no mezclar “sin resultados” con errores genéricos.
+2. **Hook de listado** (`hooks/useCharacters.ts`): encapsula la query de TanStack (clave por página y nombre) para que la página no conozca detalles de caché ni de la URL de la API.
+3. **Tipos** (`types/characterType.ts`): distinción entre el personaje completo (`Character`) y el subconjunto usado en tarjetas y favoritos, para no persistir ni propagar campos innecesarios.
+4. **Página principal** (`app/page.tsx`): orquesta query params, estados de la lista, paginación, modal de detalle y filtro de “solo favoritos”.
+5. **Layout** (`app/layout.tsx`): proveedores globales y `<Suspense>` alrededor del navbar donde hace falta por el uso de `useSearchParams`, evitando problemas de prerender en rutas internas (por ejemplo 404).
+
+---
+
+## Estructura del repositorio
+
+```txt
+app/
+  layout.tsx          # Shell global, Providers, Suspense del navbar
+  page.tsx            # Listado, filtros, modal, paginación
+  providers.tsx       # QueryClientProvider y defaults de React Query
+
+components/
+  layout/             # navbar.tsx, footer.tsx
+  characterCard.tsx
+  characterCardSkeleton.tsx
+  characterModal.tsx
+  pagination.tsx
+  ui/                 # Primitivas (button, card, dialog, input, …)
+
+hooks/
+  useCharacters.ts
+
+services/
+  characters.service.ts
+
+store/
+  favorites.store.ts
+
+types/
+  characterType.ts
+
+lib/
+  utils.ts            # Utilidades (p. ej. cn para clases)
+```
+
+---
+
+## Posibles extensiones
+
+Rutas dedicadas de detalle (`/character/[id]`), filtros adicionales soportados por la API, tests unitarios sobre el servicio y el hook, o integración con un gestor de estado servidor si el alcance creciera más allá del cliente.
