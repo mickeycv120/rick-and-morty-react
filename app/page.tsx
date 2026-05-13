@@ -27,31 +27,40 @@ export default function Home() {
         </p>
       </section>
 
-      <div>
-        <div>{data?.info.count ?? '-'}</div>
-        <div>Personajes</div>
-      </div>
+      <section aria-labelledby="characters-heading">
+        <h2 id="characters-heading" className="sr-only">
+          Personajes
+        </h2>
+        <div className="flex gap-4 px-8">
+          <div>
+            <div>{data?.info.count ?? "-"}</div>
+            <div>Personajes</div>
+          </div>
 
-      <div>
-        <div>{data?.info.pages ?? '-'}</div>
-        <div>Páginas</div>
-      </div>
-{/* 
+          <div>
+            <div>{data?.info.pages ?? "-"}</div>
+            <div>Páginas</div>
+          </div>
+        </div>
+
+        {/* 
       <div>
         <div>{favoritesCount ?? '-'}</div>
         <div>Favoritos</div>
       </div> */}
 
-      <div className="mx-4 my-8 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-        {data?.results?.map((character) => (
-          <CharacterCard
-            key={character.id}
-            character={character}
-            onFavorite={() => {}}
-            isFavorite={false}
-          />
-        ))}
-      </div>
+        <div className="mx-4 my-8 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+          {data?.results?.map((character, index) => (
+            <CharacterCard
+              key={character.id}
+              character={character}
+              onFavorite={() => {}}
+              isFavorite={false}
+              priority={index < 4}
+            />
+          ))}
+        </div>
+      </section>
     </div>
   );
 }

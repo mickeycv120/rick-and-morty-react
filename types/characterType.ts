@@ -21,4 +21,4 @@ export interface Character {
     created: string;
 }
 
-export type CharacterCardData = Pick<Character, "id" | "name" | "image">;
+export type CharacterCardData = Pick<Character, "id" | "name" | "image"| "status" | "species" | "origin">;
