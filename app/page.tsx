@@ -1,8 +1,17 @@
 "use client";
-import { useCharacters } from "@/hooks/useCharacters";
+
+import { useState } from "react";
+
 import { CharacterCard } from "@/components/characterCard";
+import { CharacterModal } from "@/components/characterModal";
+import { useCharacters } from "@/hooks/useCharacters";
+import type { Character } from "@/types/characterType";
+
 export default function Home() {
-   const { data, isLoading, error } = useCharacters();
+  const { data, isLoading, error } = useCharacters();
+  const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(
+    null,
+  );
 
     if (isLoading) return <div>Loading...</div>;
     if (error) return <div>Error: {error.message}</div>;
@@ -60,12 +69,21 @@ export default function Home() {
               key={character.id}
               character={character}
               onFavorite={() => {}}
+              onSelect={() => setSelectedCharacter(character)}
               isFavorite={false}
               priority={index < 4}
             />
           ))}
         </div>
       </section>
+
+      <CharacterModal
+        character={selectedCharacter}
+        open={selectedCharacter !== null}
+        onOpenChange={(open) => {
+          if (!open) setSelectedCharacter(null);
+        }}
+      />
     </div>
   );
 }
