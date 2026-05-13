@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import Image from "next/image";
 import { Heart, Search } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -79,9 +80,16 @@ export default function Navbar() {
       <div className="mx-auto flex w-full max-w-6xl items-center gap-4">
         <Link
           href="/"
-          className="flex shrink-0 items-baseline gap-1.5 font-semibold tracking-tight text-ink transition-colors hover:text-acid"
+          className="flex shrink-0 items-center rounded-md outline-none ring-offset-background transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         >
-          <span className="text-base sm:text-lg">Rick & Morty</span>
+          <Image
+            src="/Rick_and_Morty.svg"
+            alt="Rick and Morty"
+            width={264}
+            height={81}
+            priority
+            className="h-7 w-auto max-w-[min(200px,52vw)] object-contain object-left sm:h-9 sm:max-w-[240px]"
+          />
         </Link>
 
         <div className="relative min-w-0 flex-1">
