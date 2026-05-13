@@ -3,18 +3,18 @@
 import { useState } from "react";
 
 import { CharacterCard } from "@/components/characterCard";
+import { CharacterGridSkeleton } from "@/components/characterCardSkeleton";
 import { CharacterModal } from "@/components/characterModal";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useCharacters } from "@/hooks/useCharacters";
 import type { Character } from "@/types/characterType";
 
 export default function Home() {
-  const { data, isLoading, error } = useCharacters();
+  const { data, isPending, error } = useCharacters();
   const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(
     null,
   );
 
-    if (isLoading) return <div>Loading...</div>;
-    if (error) return <div>Error: {error.message}</div>;
   return (
     <div>
       <section
@@ -37,43 +37,63 @@ export default function Home() {
           </p>
           <div className="flex shrink-0 gap-8 sm:justify-end sm:gap-10">
             <div>
-              <div className="font-heading text-2xl font-semibold tabular-nums text-foreground">
-                {data?.info.count ?? "-"}
-              </div>
+              {isPending ? (
+                <Skeleton className="mb-1 h-8 w-16" />
+              ) : (
+                <div className="font-heading text-2xl font-semibold tabular-nums text-foreground">
+                  {error ? "—" : (data?.info.count ?? "—")}
+                </div>
+              )}
               <div className="text-sm text-ink-dim">Personajes</div>
             </div>
             <div>
-              <div className="font-heading text-2xl font-semibold tabular-nums text-foreground">
-                {data?.info.pages ?? "-"}
-              </div>
+              {isPending ? (
+                <Skeleton className="mb-1 h-8 w-12" />
+              ) : (
+                <div className="font-heading text-2xl font-semibold tabular-nums text-foreground">
+                  {error ? "—" : (data?.info.pages ?? "—")}
+                </div>
+              )}
               <div className="text-sm text-ink-dim">Páginas</div>
             </div>
           </div>
         </div>
       </section>
 
-      <section aria-labelledby="characters-heading">
+      <section
+        aria-labelledby="characters-heading"
+        aria-busy={isPending}
+      >
         <h2 id="characters-heading" className="sr-only">
           Personajes
         </h2>
 
-        {/* 
-      <div>
-        <div>{favoritesCount ?? '-'}</div>
-        <div>Favoritos</div>
-      </div> */}
-
         <div className="mx-4 my-8 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-          {data?.results?.map((character, index) => (
-            <CharacterCard
-              key={character.id}
-              character={character}
-              onFavorite={() => {}}
-              onSelect={() => setSelectedCharacter(character)}
-              isFavorite={false}
-              priority={index < 4}
-            />
-          ))}
+          {error ? (
+            <p
+              className="col-span-full rounded-lg border border-line bg-muted/30 px-4 py-6 text-center text-sm text-foreground"
+              role="alert"
+            >
+              No se pudieron cargar los personajes: {error.message}
+            </p>
+          ) : isPending ? (
+            <CharacterGridSkeleton />
+          ) : !data?.results?.length ? (
+            <p className="col-span-full px-4 py-10 text-center text-ink-dim">
+              No hay personajes para mostrar.
+            </p>
+          ) : (
+            data.results.map((character, index) => (
+              <CharacterCard
+                key={character.id}
+                character={character}
+                onFavorite={() => {}}
+                onSelect={() => setSelectedCharacter(character)}
+                isFavorite={false}
+                priority={index < 4}
+              />
+            ))
+          )}
         </div>
       </section>
 
