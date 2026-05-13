@@ -74,10 +74,10 @@ export default function Navbar() {
 
   return (
     <header
-      className="relative z-50 w-full shrink-0 border-b border-line bg-surface px-4 py-3 text-ink"
+      className="relative z-50 w-full shrink-0 border-b border-line bg-surface pl-2 pr-4 py-3 text-ink sm:pl-3"
       data-testid="site-navbar"
     >
-      <div className="mx-auto flex w-full max-w-6xl items-center gap-4">
+      <div className="ml-0 mr-auto flex w-full max-w-6xl items-center gap-3 sm:gap-4">
         <Link
           href="/"
           className="flex shrink-0 items-center rounded-md outline-none ring-offset-background transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
@@ -88,7 +88,7 @@ export default function Navbar() {
             width={264}
             height={81}
             priority
-            className="h-7 w-auto max-w-[min(200px,52vw)] object-contain object-left sm:h-9 sm:max-w-[240px]"
+            className="block h-7 w-auto max-w-[min(200px,52vw)] object-contain object-left sm:h-9 sm:max-w-[240px]"
           />
         </Link>
 
