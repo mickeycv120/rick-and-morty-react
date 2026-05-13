@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import { CharacterCard } from "@/components/characterCard";
 import { CharacterGridSkeleton } from "@/components/characterCardSkeleton";
@@ -10,9 +11,21 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useCharacters } from "@/hooks/useCharacters";
 import type { Character } from "@/types/characterType";
 
-export default function Home() {
-  const [page, setPage] = useState(1);
-  const { data, isPending, error } = useCharacters(page);
+function parsePageParam(params: URLSearchParams) {
+  const raw = params.get("page");
+  const n = Math.floor(Number(raw));
+  return Number.isFinite(n) && n >= 1 ? n : 1;
+}
+
+function HomeContent() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const page = parsePageParam(searchParams);
+  const name = searchParams.get("name")?.trim() ?? "";
+
+  const { data, isPending, error } = useCharacters(page, name);
   const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(
     null,
   );
@@ -21,7 +34,11 @@ export default function Home() {
 
   const handlePageChange = (next: number) => {
     setSelectedCharacter(null);
-    setPage(next);
+    const p = new URLSearchParams(searchParams.toString());
+    if (next <= 1) p.delete("page");
+    else p.set("page", String(next));
+    const qs = p.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
   };
 
   return (
@@ -124,5 +141,33 @@ export default function Home() {
         }}
       />
     </div>
+  );
+}
+
+function HomeFallback() {
+  return (
+    <div>
+      <section className="mx-auto flex max-w-[1440px] flex-col gap-4 px-8 pt-12 pb-6">
+        <Skeleton className="h-14 w-full max-w-xl" />
+        <div className="flex flex-col gap-6 sm:flex-row sm:justify-between">
+          <Skeleton className="h-20 w-full max-w-2xl" />
+          <div className="flex gap-8">
+            <Skeleton className="h-16 w-24" />
+            <Skeleton className="h-16 w-24" />
+          </div>
+        </div>
+      </section>
+      <div className="mx-4 my-8">
+        <CharacterGridSkeleton />
+      </div>
+    </div>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={<HomeFallback />}>
+      <HomeContent />
+    </Suspense>
   );
 }
