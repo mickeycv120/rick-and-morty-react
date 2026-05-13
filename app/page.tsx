@@ -5,15 +5,24 @@ import { useState } from "react";
 import { CharacterCard } from "@/components/characterCard";
 import { CharacterGridSkeleton } from "@/components/characterCardSkeleton";
 import { CharacterModal } from "@/components/characterModal";
+import { PaginationContainer } from "@/components/pagination";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCharacters } from "@/hooks/useCharacters";
 import type { Character } from "@/types/characterType";
 
 export default function Home() {
-  const { data, isPending, error } = useCharacters();
+  const [page, setPage] = useState(1);
+  const { data, isPending, error } = useCharacters(page);
   const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(
     null,
   );
+
+  const totalPages = data?.info.pages ?? 0;
+
+  const handlePageChange = (next: number) => {
+    setSelectedCharacter(null);
+    setPage(next);
+  };
 
   return (
     <div>
@@ -95,6 +104,16 @@ export default function Home() {
             ))
           )}
         </div>
+
+        {!error && !isPending && totalPages > 0 ? (
+          <div className="mx-4 mb-10 flex justify-center px-4">
+            <PaginationContainer
+              currentPage={page}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+            />
+          </div>
+        ) : null}
       </section>
 
       <CharacterModal
