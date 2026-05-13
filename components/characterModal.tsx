@@ -8,13 +8,23 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import type { Character, CharacterStatus } from "@/types/characterType";
+import type {
+  Character,
+  CharacterCardData,
+  CharacterStatus,
+} from "@/types/characterType";
 
 export type CharacterModalProps = {
-  character: Character | null;
+  character: Character | CharacterCardData | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 };
+
+function isFullCharacter(
+  c: Character | CharacterCardData,
+): c is Character {
+  return "episode" in c;
+}
 
 function statusBadgeVariant(
   status: CharacterStatus,
@@ -55,7 +65,7 @@ export function CharacterModal({
                     aria-label="Resumen del personaje"
                   >
                     <Badge variant="outline">{character.species}</Badge>
-                    {character.type ? (
+                    {"type" in character && character.type ? (
                       <Badge variant="secondary">{character.type}</Badge>
                     ) : null}
                     <Badge variant={statusBadgeVariant(character.status)}>
@@ -65,20 +75,22 @@ export function CharacterModal({
                 </DialogDescription>
               </DialogHeader>
 
-              <div>
-                <p className="mb-2.5 text-xs font-medium uppercase tracking-wider text-ink-dim">
-                  Información
-                </p>
-                <div className="flex flex-wrap justify-center gap-2 sm:justify-start">
-                  <Badge variant="outline" className="tabular-nums">
-                    Género · {character.gender}
-                  </Badge>
-                  <Badge variant="outline" className="tabular-nums">
-                    {character.episode.length}{" "}
-                    {character.episode.length === 1 ? "episodio" : "episodios"}
-                  </Badge>
+              {isFullCharacter(character) ? (
+                <div>
+                  <p className="mb-2.5 text-xs font-medium uppercase tracking-wider text-ink-dim">
+                    Información
+                  </p>
+                  <div className="flex flex-wrap justify-center gap-2 sm:justify-start">
+                    <Badge variant="outline" className="tabular-nums">
+                      Género · {character.gender}
+                    </Badge>
+                    <Badge variant="outline" className="tabular-nums">
+                      {character.episode.length}{" "}
+                      {character.episode.length === 1 ? "episodio" : "episodios"}
+                    </Badge>
+                  </div>
                 </div>
-              </div>
+              ) : null}
 
               <div className="space-y-2.5">
                 <p className="text-xs font-medium uppercase tracking-wider text-ink-dim">
@@ -92,13 +104,23 @@ export function CharacterModal({
                     <span className="shrink-0 text-ink-faint">Origen · </span>
                     <span>{character.origin.name}</span>
                   </Badge>
-                  <Badge
-                    variant="secondary"
-                    className="w-full justify-center py-2 sm:justify-start"
-                  >
-                    <span className="shrink-0 text-ink-faint">Ubicación · </span>
-                    <span>{character.location.name}</span>
-                  </Badge>
+                  {"location" in character ? (
+                    <Badge
+                      variant="secondary"
+                      className="w-full justify-center py-2 sm:justify-start"
+                    >
+                      <span className="shrink-0 text-ink-faint">Ubicación · </span>
+                      <span>{character.location.name}</span>
+                    </Badge>
+                  ) : (
+                    <Badge
+                      variant="secondary"
+                      className="w-full justify-center py-2 sm:justify-start text-ink-dim"
+                    >
+                      <span className="shrink-0 text-ink-faint">Ubicación · </span>
+                      <span>No disponible en favoritos</span>
+                    </Badge>
+                  )}
                 </div>
               </div>
             </div>

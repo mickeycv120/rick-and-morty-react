@@ -9,7 +9,8 @@ import { CharacterModal } from "@/components/characterModal";
 import { PaginationContainer } from "@/components/pagination";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCharacters } from "@/hooks/useCharacters";
-import type { Character } from "@/types/characterType";
+import type { Character, CharacterCardData } from "@/types/characterType";
+import { useFavoritesStore } from "@/store/favorites.store";
 
 function parsePageParam(params: URLSearchParams) {
   const raw = params.get("page");
@@ -24,13 +25,32 @@ function HomeContent() {
 
   const page = parsePageParam(searchParams);
   const name = searchParams.get("name")?.trim() ?? "";
+  const showingFavorites = searchParams.get("favorites") === "1";
 
-  const { data, isPending, error } = useCharacters(page, name);
-  const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(
-    null,
-  );
+  const allFavorites = useFavoritesStore((s) => s.favorites);
 
-  const totalPages = data?.info.pages ?? 0;
+  const favoritesResults = showingFavorites
+    ? allFavorites.filter((f) =>
+        name ? f.name.toLowerCase().includes(name.toLowerCase()) : true,
+      )
+    : [];
+
+  const { data, isPending, error } = useCharacters(page, name, {
+    enabled: !showingFavorites,
+  });
+
+  const characters: ReadonlyArray<Character | CharacterCardData> =
+    showingFavorites ? favoritesResults : (data?.results ?? []);
+  const totalPages = showingFavorites ? 0 : (data?.info.pages ?? 0);
+  const totalCount = showingFavorites
+    ? favoritesResults.length
+    : (data?.info.count ?? 0);
+
+  const listLoading = !showingFavorites && isPending;
+
+  const [selectedCharacter, setSelectedCharacter] = useState<
+    Character | CharacterCardData | null
+  >(null);
 
   const handlePageChange = (next: number) => {
     setSelectedCharacter(null);
@@ -63,21 +83,25 @@ function HomeContent() {
           </p>
           <div className="flex shrink-0 gap-8 sm:justify-end sm:gap-10">
             <div>
-              {isPending ? (
+              {listLoading ? (
                 <Skeleton className="mb-1 h-8 w-16" />
               ) : (
                 <div className="font-heading text-2xl font-semibold tabular-nums text-foreground">
-                  {error ? "—" : (data?.info.count ?? "—")}
+                  {!showingFavorites && error ? "—" : totalCount}
                 </div>
               )}
               <div className="text-sm text-ink-dim">Personajes</div>
             </div>
             <div>
-              {isPending ? (
+              {listLoading ? (
                 <Skeleton className="mb-1 h-8 w-12" />
               ) : (
                 <div className="font-heading text-2xl font-semibold tabular-nums text-foreground">
-                  {error ? "—" : (data?.info.pages ?? "—")}
+                  {!showingFavorites && error
+                    ? "—"
+                    : showingFavorites
+                      ? "—"
+                      : (totalPages || "—")}
                 </div>
               )}
               <div className="text-sm text-ink-dim">Páginas</div>
@@ -88,41 +112,41 @@ function HomeContent() {
 
       <section
         aria-labelledby="characters-heading"
-        aria-busy={isPending}
+        aria-busy={listLoading}
       >
         <h2 id="characters-heading" className="sr-only">
           Personajes
         </h2>
 
         <div className="mx-4 my-8 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-          {error ? (
+          {!showingFavorites && error ? (
             <p
               className="col-span-full rounded-lg border border-line bg-muted/30 px-4 py-6 text-center text-sm text-foreground"
               role="alert"
             >
               No se pudieron cargar los personajes: {error.message}
             </p>
-          ) : isPending ? (
+          ) : !showingFavorites && isPending ? (
             <CharacterGridSkeleton />
-          ) : !data?.results?.length ? (
+          ) : characters.length === 0 ? (
             <p className="col-span-full px-4 py-10 text-center text-ink-dim">
-              No hay personajes para mostrar.
+              {showingFavorites
+                ? "No tienes favoritos aún."
+                : "No hay personajes para mostrar."}
             </p>
           ) : (
-            data.results.map((character, index) => (
+            characters.map((character, index) => (
               <CharacterCard
                 key={character.id}
                 character={character}
-                onFavorite={() => {}}
                 onSelect={() => setSelectedCharacter(character)}
-                isFavorite={false}
                 priority={index < 4}
               />
             ))
           )}
         </div>
 
-        {!error && !isPending && totalPages > 0 ? (
+        {!showingFavorites && !error && !listLoading && totalPages > 0 ? (
           <div className="mx-4 mb-10 flex justify-center px-4">
             <PaginationContainer
               currentPage={page}

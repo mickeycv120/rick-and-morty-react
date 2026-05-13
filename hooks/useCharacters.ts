@@ -3,9 +3,18 @@
 import { useQuery } from "@tanstack/react-query";
 import { getCharacters } from "@/services/characters.service";
 
-export function useCharacters(page = 1, name = "") {
+type UseCharactersOptions = {
+    enabled?: boolean;
+};
+
+export function useCharacters(
+    page = 1,
+    name = "",
+    options?: UseCharactersOptions,
+) {
     return useQuery({
         queryKey: ["characters", "list", page, name],
         queryFn: () => getCharacters(page, name),
+        enabled: options?.enabled ?? true,
     });
 }

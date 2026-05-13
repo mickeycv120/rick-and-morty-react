@@ -1,26 +1,24 @@
 import Image from "next/image";
 import { Heart } from "lucide-react";
-
 import { Card, CardContent } from "@/components/ui/card";
 import type { CharacterCardData } from "@/types/characterType";
 import { Toggle } from "@/components/ui/toggle";
 import { Separator } from "@/components/ui/separator";
+import { useFavoritesStore } from "@/store/favorites.store";
 
 export type CharacterCardProps = {
   character: CharacterCardData;
-  onFavorite: () => void;
   onSelect?: () => void;
-  isFavorite: boolean;
   priority?: boolean;
 };
 
 export const CharacterCard = ({
   character,
-  onFavorite,
   onSelect,
-  isFavorite,
   priority = false,
 }: CharacterCardProps) => {
+  const toggle = useFavoritesStore((state) => state.toggle);
+  const isFavorite = useFavoritesStore((state) => state.isFavorite(character.id));
   return (
     <Card className="relative w-full max-w-sm gap-0 p-0 overflow-hidden">
       {onSelect ? (
@@ -46,7 +44,7 @@ export const CharacterCard = ({
           variant="outline"
           size="icon"
           pressed={isFavorite}
-          onPressedChange={() => onFavorite()}
+          onPressedChange={() => toggle(character)}
           className="pointer-events-auto absolute top-2 right-2 z-3 bg-background/80 rounded-full"
         >
           <Heart
